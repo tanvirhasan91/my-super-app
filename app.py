@@ -1,116 +1,103 @@
-লিংক  https://www.facebook.com/ShekhMahmud.24
+import streamlit as st
+from gtts import gTTS
+from pytubefix import YouTube
+import os
 
-Sagor Khan
-11:24 PM
-ভাই
+# ----------------- পেজ কনফিগারেশন -----------------
+st.set_page_config(page_title="My Super App", page_icon="🚀", layout="centered")
 
-Resell Kori
-11:27 PM
-https://chatgpt.com/backend-api/estuary/content?id=file_00000000c9b471faa431b6c2f78eba94&ts=490673&p=fs&cid=1&sig=6839b05d07dcb5893f316ae4313754e5f5c9a272b99223fec176165b2c3ed619&v=0
+# ----------------- সাইডবার (মেনু) -----------------
+st.sidebar.title("🧰 Menu")
+app_mode = st.sidebar.selectbox("Choose an App:", ["Home", "Text to Speech 🗣️", "Video Downloader 📺"])
 
-Ashraful Alam
-11:30 PM
-Gmini deya o kora jai
+# ----------------- ১. হোম পেজ (Home) -----------------
+if app_mode == "Home":
+    st.title("Welcome to My Super App 🚀")
+    st.write("This application contains multiple tools.")
+    st.success("👈 Please select a tool from the Sidebar menu.")
+    st.image("https://cdn-icons-png.flaticon.com/512/3067/3067260.png", width=200)
 
-Resell Kori
-11:30 PM
-এই লিংক দেখলেও হবে জারা উপরের লিংক দেখতে পারতেছেন না
-https://resellkori.com/product/test-2/
-যাস্ট ছবিটা দেখুন তাহলেই হবে
+# ----------------- ২. টেক্সট টু স্পিচ (TTS) -----------------
+elif app_mode == "Text to Speech 🗣️":
+    st.header("🗣️ Text to Speech Converter")
+    st.write("Convert your text into audio instantly!")
 
-Maruf Ahmed
-11:51 PM
-আমি
+    # ভাষা নির্বাচনের অপশন
+    lang_options = {
+        "English": "en",
+        "Bengali (বাংলা)": "bn",
+        "Hindi (हिंदी)": "hi",
+        "Spanish": "es",
+        "French": "fr"
+    }
 
-Metro Maa
-11:52 PM
-1 lakh
+    # দুটি কলাম করা হলো (পাশাপাশি দেখানোর জন্য)
+    col1, col2 = st.columns(2)
 
-murshad
-11:52 PM
-https://www.facebook.com/themobilemedia.collection/
+    with col1:
+        # ভাষা নির্বাচন
+        selected_lang_name = st.selectbox("Select Language:", list(lang_options.keys()))
+        selected_lang_code = lang_options[selected_lang_name]
 
-Metro Maa
-11:52 PM
-Gift item
+    with col2:
+        # স্পিড নির্বাচন (Normal vs Slow)
+        speed_mode = st.radio("Select Speed / গতি:", ["Normal", "Slow"])
 
-Maruf Ahmed
-11:53 PM
-১০০০০
+    text_input = st.text_area("Enter text here / এখানে লিখুন:", height=150)
 
-Mdmosharof Hossain
-11:53 PM
-https://www.facebook.com/mkonlineshopbdcom
+    if st.button("Convert to Audio 🎵"):
+        if text_input:
+            try:
+                # স্পিড লজিক সেট করা
+                # যদি Slow সিলেক্ট করে তবে slow=True, নাহলে slow=False
+                is_slow = True if speed_mode == "Slow" else False
 
-Joe Shariar
-11:53 PM
-https://www.facebook.com/muslimhouse101
+                # অডিও তৈরি
+                tts = gTTS(text=text_input, lang=selected_lang_code, slow=is_slow)
 
-murshad
-11:53 PM
-https://www.facebook.com/MehekeNoor/
+                save_file = "speech.mp3"
+                tts.save(save_file)
 
-Maruf Ahmed
-11:53 PM
-https://www.facebook.com/share/17ozwVygch/
+                # অডিও প্লে এবং ডাউনলোড
+                audio_file = open(save_file, "rb")
+                audio_bytes = audio_file.read()
 
-erfat jahan
-11:53 PM
-https://www.facebook.com/share/15mgnRhRSy/
+                st.audio(audio_bytes, format="audio/mp3")
+                st.download_button(label="Download Audio", data=audio_bytes, file_name="speech.mp3", mime="audio/mp3")
 
-Ashraful Alam
-11:54 PM
-https://web.facebook.com/profile.php?id=61585144423096
+                st.success(f"Done! Language: {selected_lang_name} | Speed: {speed_mode} ✅")
 
-Md. Al-Amin
-11:54 PM
-https://www.facebook.com/paikaridokandhaka/
+            except Exception as e:
+                st.error(f"Error: {e}")
+        else:
+            st.warning("Please write something first!")
 
-Easin Shekh
-11:54 PM
-ami ai platform e kaj korte Chai
+# ----------------- ৩. ইউটিউব ডাউনলোডার -----------------
+elif app_mode == "Video Downloader 📺":
+    st.header("📺 YouTube Video Downloader")
 
-Sohel Mart BD
-11:55 PM
-https://www.facebook.com/profile.php?id=61580152350402
+    save_path = os.path.join(os.path.expanduser("~"), "Desktop", "MyDownloads")
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
-Metro Maa
-11:55 PM
-2 page  miliye
-https://www.facebook.com/MetroMaaofc
-https://www.facebook.com/DakbaxoOfficial
+    url = st.text_input("Paste YouTube Link Here:")
 
-unityebazar
-11:56 PM
-https://www.facebook.com/unityebazar/
+    if st.button("Download Video ⬇️"):
+        if url:
+            try:
+                st.info("Fetching video info... Please wait ⏳")
+                yt = YouTube(url)
 
-TUSHAR AHAMMED
-11:56 PM
-https://www.facebook.com/tushartechbd
-keep
-Pinned
+                st.image(yt.thumbnail_url, width=300)
+                st.write(f"**Title:** {yt.title}")
 
-erfat jahan
-12:02 AM
-https://www.facebook.com/share/17jLF4FBuo/
+                stream = yt.streams.get_highest_resolution()
+                stream.download(save_path)
 
-erfat jahan
-12:04 AM
-https://www.facebook.com/share/p/1GCgZZ1J5G/
+                st.success(f"✅ Video Downloaded Successfully!")
+                st.write(f"📂 Saved to: `{save_path}`")
 
-Sohel Mart BD
-12:12 AM
-https://www.facebook.com/profile.php?id=61580152350402
-
-Resell Kori
-12:14 AM
-https://openzpf.com/product/%e0%a7%a7%e0%a7%a6-%e0%a6%aa%e0%a6%bf%e0%a6%b8-%e0%a6%9f%e0%a7%87%e0%a6%b8%e0%a7%8d%e0%a6%9f%e0%a6%bf%e0%a6%82-%e0%a6%b8%e0%a7%8d%e0%a6%aa%e0%a7%8d%e0%a6%b0%e0%a7%87-%e0%a6%aa%e0%a6%be%e0%a6%b0/
-
-Md. Zobaer Rashid
-12:14 AM
-https://www.facebook.com/share/17euFGW69S/?mibextid=wwXIfr
-
-Shekh Mahmudur Rahman
-12:19 AM
-আলহামদুলিল্লাহ আমি গ্রাফিক্স ডিজাইনার। রাসেল ভাইয়া যে ডিজাইন টা করেছেন, সেটা আমার করতে ১০ মিনিট লাগবে। যদি কারো প্রয়োজন পরে আমাকে বলতে পারেন, ইলাস্ট্রেটর ফাইল দিয়ে দিব ইনশাআল্লাহ। ফেইসবুক লিংক  https://www.facebook.com/ShekhMahmud.24
-ise-kzhh-iwr
+            except Exception as e:
+                st.error(f"Error: {e}")
+        else:
+            st.warning("Please paste a link first!")
