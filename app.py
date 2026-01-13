@@ -46,15 +46,15 @@ elif app_mode == "Text to Speech 🗣️":
                 tts = gTTS(text=text, lang=lang_code, slow=is_slow)
                 tts.save("speech.mp3")
                 
-                audio_file = open("speech.mp3", "rb")
-                audio_bytes = audio_file.read()
-                st.audio(audio_bytes, format="audio/mp3")
-                st.download_button("Download Audio", audio_bytes, "speech.mp3", "audio/mp3")
-                st.success(f"Done! ({lang_name})")
+                with open("speech.mp3", "rb") as audio_file:
+                    audio_bytes = audio_file.read()
+                    st.audio(audio_bytes, format="audio/mp3")
+                    st.download_button("Download Audio", audio_bytes, "speech.mp3", "audio/mp3")
+                    st.success(f"Done! ({lang_name})")
             except Exception as e:
                 st.error(f"Error: {e}")
 
-# --- ভিডিও ডাউনলোডার (yt-dlp দিয়ে ফিক্স করা) ---
+# --- ভিডিও ডাউনলোডার (টাইটেল ফিক্সড) ---
 elif app_mode == "Video Downloader 📺":
     st.header("📺 YouTube Video Downloader (Server Fixed)")
     
@@ -63,37 +63,38 @@ elif app_mode == "Video Downloader 📺":
     if st.button("Download Video ⬇️"):
         if url:
             try:
-                # আগের ফাইল মুছে ফেলা
                 clear_downloads()
-                
                 st.info("Processing... This might take a few seconds ⏳")
                 
-                # yt-dlp অপশন
+                # টাইটেল সমস্যা এড়াতে ফিক্সড নাম ব্যবহার করা হচ্ছে
                 ydl_opts = {
-                    'outtmpl': 'downloads/%(title)s.%(ext)s',
+                    'outtmpl': 'downloads/my_video.%(ext)s', 
                     'format': 'best',
                     'noplaylist': True,
                 }
                 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info = ydl.extract_info(url, download=True)
-                    file_path = ydl.prepare_filename(info)
-                    title = info.get('title', 'Video')
-                    thumbnail = info.get('thumbnail')
-                
-                # ফলাফল দেখানো
-                if thumbnail:
-                    st.image(thumbnail, width=300)
-                st.success(f"✅ Ready: {title}")
-                
-                # ডাউনলোড বাটন
-                with open(file_path, "rb") as f:
-                    st.download_button(
-                        label="Download to PC 📥",
-                        data=f,
-                        file_name=os.path.basename(file_path),
-                        mime="video/mp4"
-                    )
+                    video_title = info.get('title', 'Video')
+                    
+                    # ফাইল খুঁজে বের করা (mp4 বা mkv হতে পারে)
+                    downloaded_file = None
+                    for file in os.listdir("downloads"):
+                        if file.startswith("my_video"):
+                            downloaded_file = os.path.join("downloads", file)
+                            break
+                    
+                    if downloaded_file:
+                        st.success(f"✅ Ready: {video_title}")
+                        with open(downloaded_file, "rb") as f:
+                            st.download_button(
+                                label="Download to PC 📥",
+                                data=f,
+                                file_name=f"{video_title}.mp4", # ডাউনলোডের সময় আসল নাম দেখাবে
+                                mime="video/mp4"
+                            )
+                    else:
+                        st.error("Error: File not found after download.")
                     
             except Exception as e:
                 st.error(f"Error: {e}")
